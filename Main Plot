@@ -1,0 +1,35 @@
+input over_bought = 40.0;
+input over_sold = -40.0;
+input percentDLength = 3;
+input percentKLength = 5;
+
+def min_low = lowest(low, percentKLength);
+def max_high = highest(high, percentKLength);
+def rel_diff = close - (max_high + min_low)/2;
+def fsdiff = max_high - min_low;
+
+def avgrel = expaverage(expaverage(rel_diff, percentDLength), percentDLength);
+def avgdiff = expaverage(expaverage(fsdiff, percentDLength), percentDLength);
+
+
+plot SMI = if avgdiff != 0 then avgrel / (avgdiff / 2) * 100 else 0;
+smi.setDefaultColor(getColor(1));
+
+plot AvgSMI = expaverage(smi, percentDLength);
+avgsmi.setDefaultColor(getcolor(5));
+
+plot Diff = (SMI - AvgSMI);
+plot overbought = over_bought;
+overbought.setDefaultColor(getcolor(5));
+
+plot oversold = over_sold;
+oversold.setDefaultColor(getcolor(5)); 
+plot zeroline = 0;
+Diff.SetDefaultColor(GetColor(5));
+Diff.SetPaintingStrategy(PaintingStrategy.HISTOGRAM);
+Diff.SetLineWeight(3);
+Diff.DefineColor("Positive and Up", Color.GREEN);
+Diff.DefineColor("Positive and Down", Color.DARK_GREEN);
+Diff.DefineColor("Negative and Down", Color.RED);
+Diff.DefineColor("Negative and Up", Color.DARK_RED);
+Diff.AssignValueColor(if Diff >= 0 then if Diff > Diff[1] then Diff.color("Positive and Up") else Diff.color("Positive and Down") else if Diff < Diff[1] then Diff.color("Negative and Down") else Diff.color("Negative and Up"));
